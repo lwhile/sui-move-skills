@@ -1,35 +1,35 @@
-# Agent Skills — ECS Game Engine on Sui
+# Sui Move Skills
 
-These skills teach an AI agent how to build a **reusable on-chain ECS game engine on Sui Move**. Read them in order — each skill builds on the previous one.
+A repository focused on building **Sui Move skills**.
 
-## Skills
+This project is forked from [Prajeet-Shrestha/sui-move-skills](https://github.com/Prajeet-Shrestha/sui-move-skills), but it no longer follows the ECS Game Engine direction of the original repository. This fork is dedicated to collecting more general and reusable Sui Move knowledge and skill materials for AI-assisted coding, code review, and day-to-day development reference.
 
-| # | Skill | What It Teaches |
-|---|-------|----------------|
-| 1 | [Sui Move Patterns](./sui_move_patterns/SKILL.md) | **Language foundations** — object model, abilities, dynamic fields, design patterns (Capability, Witness, Hot Potato), visibility, API design |
-| 2 | [Sui Framework Modules](./sui_framework/SKILL.md) | **Framework API reference** — exact function signatures for `object`, `dynamic_field`, `transfer`, `clock`, `random`, `coin`, `table`, `bag`, etc. |
-| 3 | [Sui Engineering Practices](./sui_engineering/SKILL.md) | **Production quality** — upgradeability, gas optimization, protocol limits, error handling, code quality checklist |
-| 4 | [ECS Game Engine Principles](./game_engine/SKILL.md) | **Engine architecture** — Entity-Component-System on Sui, conventions for entities, components, systems, configs, events, and testing |
+## Focus
 
-## How to Use
+- Focus on Sui Move itself rather than game engine architecture
+- Distill common object model patterns, abilities, dynamic fields, collections, and framework APIs
+- Capture upgradeability, security, gas, error handling, naming, and testing practices
+- Provide a base repository for expanding more Sui Move skills over time
 
-1. **Building the engine?** Start with Skills 1-3 for Sui Move fundamentals, then use Skill 4 for ECS architecture decisions.
-2. **Building a game on the engine?** Read Skill 4's reference files and copy the example templates as starting points.
-3. **Looking up a specific API?** Go directly to Skill 2's decision matrix tables.
-4. **Reviewing code?** Check Skill 3's code quality checklist and error handling conventions.
+## Scope
 
-## Structure
+- Sui Move object model and ownership semantics
+- Core mechanisms such as abilities, dynamic fields, and collections
+- Common Sui Framework APIs and their practical boundaries
+- Upgradeability, security, gas, error handling, testing, and naming conventions
+- Reusable contract design patterns and example-driven references
 
-Each skill follows the same layout:
+## Use Cases
 
-```
-skill_name/
-├── SKILL.md          # Overview, decision matrices, links to references
-└── references/       # Detailed docs on specific topics
-```
+- Give AI agents more reliable context when generating Sui Move code
+- Provide a quick reference for common Sui Move patterns and framework APIs
+- Support code review with practical engineering checks and common pitfalls
 
-Skill 4 (`game_engine`) also includes:
-```
-game_engine/
-└── examples/         # Copy-paste templates for components and systems
-```
+## Direction
+
+This fork will continue to expand around **Sui Move skills**, including areas such as:
+
+- Language and object model references
+- Sui Framework API quick references
+- Engineering practices and code review checklists
+- Reusable contract design patterns and examples
