@@ -2,6 +2,15 @@
 
 > Source: [Move Book — Code Quality Checklist](https://move-book.com/guides/code-quality-checklist)
 
+## Table of Contents
+
+- [Module & Imports](#module--imports)
+- [Constants](#constants)
+- [Structs](#structs)
+- [Functions](#functions)
+- [Method Syntax & Macros](#method-syntax--macros)
+- [Testing Conventions](#testing-conventions)
+
 ## Module & Imports
 
 ### Module Declaration

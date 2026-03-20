@@ -52,7 +52,7 @@ transfer::share_object(obj);
 - Any account can access in transactions
 - Requires **consensus** (slower, more expensive)
 - Cannot be "unshared" once shared
-- Ideal for: game state, registries, marketplaces, escrows
+- Ideal for: shared state, registries, marketplaces, escrows
 
 ### 3. Immutable (Frozen)
 
@@ -91,7 +91,7 @@ transfer::transfer(obj2, object::id(&obj1).to_address());
 | Shared | Consensus | ~2-3s | Higher |
 | Object-owned | Fast path | ~400ms | Lowest |
 
-**Engine design implication:** Prefer owned objects where possible. Use shared objects only when multiple accounts genuinely need to modify the same state in the same epoch.
+**Design implication:** Prefer owned objects where possible. Use shared objects only when multiple accounts genuinely need to modify the same state in the same epoch.
 
 ## Anti-Patterns
 

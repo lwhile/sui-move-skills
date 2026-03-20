@@ -2,6 +2,16 @@
 
 > Source: [Move Book Ch 5.15, 5.18–5.20, 8.2–8.3](https://move-book.com/move-basics/)
 
+## Table of Contents
+
+- [Visibility Modifiers](#visibility-modifiers)
+- [Struct Methods (Receiver Syntax)](#struct-methods-receiver-syntax)
+- [Module Initializer (`init`)](#module-initializer-init)
+- [Transaction Context](#transaction-context)
+- [Enums and Match (Move 2024)](#enums-and-match-move-2024)
+- [Error Conventions](#error-conventions)
+- [Naming Conventions](#naming-conventions)
+
 ## Visibility Modifiers
 
 ### Summary
@@ -9,8 +19,8 @@
 | Modifier | Callable From | Use For |
 |----------|--------------|---------|
 | (none) | Same module only | Private helpers, internal logic |
-| `public(package)` | Any module in the same package | Cross-module coordination within a system |
-| `public` | Any module in any package | Engine API, reusable utilities |
+| `public(package)` | Any module in the same package | Package-internal coordination helpers |
+| `public` | Any module in any package | Reusable package API |
 | `entry` | Transactions only (not from other Move code) | Top-level PTB endpoints |
 
 ### `public` vs `entry`
@@ -18,13 +28,13 @@
 Both can be called from transactions, but:
 - `public` functions can also be called from other Move modules
 - `entry` functions can **only** be called from transactions (cannot be composed in Move)
-- A function can be both: `entry fun` (callable from both)
+- A function can be both: `public entry fun` (callable from transactions and other Move code)
 
 **Convention**: Prefer `public` for composability. Use `entry` only when a function should never be called from other Move code (e.g., admin-only setup functions).
 
-### `public(package)` — Cross-Module Helpers
+### `public(package)` — Package-Internal Helpers
 
-Essential for the system pattern (entry + helpers + events in the same package):
+Useful when a package has multiple modules that coordinate internally but should not expose those helpers to other packages:
 
 ```move
 // helpers.move — only callable from entry.move in the same package
@@ -59,7 +69,7 @@ let alive = health.is_alive();
 health.take_damage(10);
 ```
 
-**Convention**: Use receiver syntax for all getters and setters on components. Makes code read naturally and is consistent across all component types.
+**Convention**: Use receiver syntax for domain structs with natural getters and mutators. It keeps call sites compact and readable.
 
 ## Module Initializer (`init`)
 
@@ -116,23 +126,23 @@ let uid = object::new(ctx);
 Enums allow representing states with associated data:
 
 ```move
-public enum GameState has store, copy, drop {
-    Waiting,
-    InProgress { round: u64 },
-    Finished { winner: address },
+public enum RequestState has store, copy, drop {
+    Pending,
+    Active { started_at: u64 },
+    Closed { completed_by: address },
 }
 
 // Pattern matching
-public fun describe(state: &GameState): String {
+public fun describe(state: &RequestState): String {
     match (state) {
-        GameState::Waiting => b"waiting".to_string(),
-        GameState::InProgress { round } => b"round".to_string(),
-        GameState::Finished { winner } => b"finished".to_string(),
+        RequestState::Pending => b"pending".to_string(),
+        RequestState::Active { started_at } => b"active".to_string(),
+        RequestState::Closed { completed_by } => b"closed".to_string(),
     }
 }
 ```
 
-**Engine use case**: Entity status, game phases, action types.
+**Common use case**: Request lifecycles, workflow states, and tagged domain transitions.
 
 ## Error Conventions
 

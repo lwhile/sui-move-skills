@@ -1,0 +1,7 @@
+interface:
+  display_name: "Sui Engineering Practices"
+  short_description: "Review Sui Move code for production quality"
+  default_prompt: "Use $sui-engineering-practices to review this Sui Move code for safety, limits, and upgradeability."
+
+policy:
+  allow_implicit_invocation: false

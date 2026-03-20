@@ -2,6 +2,13 @@
 
 > Source: [Move Book Ch 8.6, 8.10](https://move-book.com/programmability/collections)
 
+## Table of Contents
+
+- [Decision Matrix](#decision-matrix)
+- [In-Memory Collections (object-size limited)](#in-memory-collections-object-size-limited)
+- [Dynamic Field Collections (unlimited)](#dynamic-field-collections-unlimited)
+- [Recommendations](#recommendations)
+
 ## Decision Matrix
 
 | Collection | Backed By | Size Limit | Key Type | Value Type | Iteration | Use When |
@@ -110,13 +117,13 @@ let back = lt.back();       // Option<u64> → Some(2)
 
 Ideal for: leaderboards, ordered queues, LRU caches.
 
-## Engine Recommendations
+## Recommendations
 
-| ECS Concept | Best Collection |
-|-------------|----------------|
-| Component data fields | `VecMap` (small maps like resource storage) |
-| Entity component attachments | `dynamic_field` (not a collection — raw df) |
-| Inventory (many items) | `Bag` or `ObjectBag` |
-| Leaderboard | `LinkedTable` |
-| Registry per-key configs | `dynamic_field` on the Registry UID |
-| Tag sets (e.g., status effects) | `VecSet` |
+| Use Case | Best Collection |
+|----------|----------------|
+| Small key-value data attached to one object | `VecMap` |
+| Extensible named data on an object | `dynamic_field` (not a collection — raw df) |
+| Heterogeneous object inventory | `Bag` or `ObjectBag` |
+| Ordered ranking or queue | `LinkedTable` |
+| Registry per-key configs | `dynamic_field` on the registry UID |
+| Small unique tag set | `VecSet` |

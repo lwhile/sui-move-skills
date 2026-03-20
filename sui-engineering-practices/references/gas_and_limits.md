@@ -2,6 +2,12 @@
 
 > Source: [Move Book — Building Against Limits](https://move-book.com/guides/building-against-limits)
 
+## Table of Contents
+
+- [Protocol Limits](#protocol-limits)
+- [Working Within Limits](#working-within-limits)
+- [Gas Optimization Tips](#gas-optimization-tips)
+
 ## Protocol Limits
 
 These limits are enforced by the network. Exceeding any of them causes the transaction to be **rejected or aborted**.
@@ -77,7 +83,7 @@ public fun mass_spawn(count: u64, ...) { ... }
 // Client sends: spawn_batch(10), spawn_batch(10), ... in separate transactions
 ```
 
-**Engine guidance**: A single entity with ~10 components costs ~10 dynamic field creates. You can safely create ~100 entities per transaction.
+**Practical guidance**: If one object creation also creates around 10 dynamic fields, then creating roughly 100 such objects in one transaction is already near the limit. Plan batching early.
 
 ### Events per Transaction (1,024)
 

@@ -2,6 +2,12 @@
 
 > Covers `sui::coin`, `sui::balance`, `sui::display`
 
+## Table of Contents
+
+- [`sui::balance` — Storable Token Amounts](#suibalance--storable-token-amounts)
+- [`sui::coin` — Fungible Tokens](#suicoin--fungible-tokens)
+- [`sui::display` — Object Display Metadata](#suidisplay--object-display-metadata)
+
 ## `sui::balance` — Storable Token Amounts
 
 `Balance<T>` is the **inner representation** of fungible token amounts. Unlike `Coin`, it has `store` but not `key`, so it can be embedded in structs without being a standalone object.
@@ -9,7 +15,7 @@
 ### Key Types
 
 ```move
-/// Storable balance. Embed in structs for in-game currency.
+/// Storable balance. Embed in package-owned structs for internal accounting.
 public struct Balance<phantom T> has store {
     value: u64,
 }
@@ -46,7 +52,7 @@ supply.decrease_supply(balance: Balance<T>): u64       // burn, returns amount b
 supply.supply_value(): u64                             // total minted
 ```
 
-### Engine Pattern: In-Game Currency Store
+### Common Pattern: Embedded Treasury Balances
 
 ```move
 public struct Treasury has key {
@@ -76,7 +82,7 @@ public fun withdraw_gold(treasury: &mut Treasury, amount: u64, ctx: &mut TxConte
 | Gas cost | Lower | Higher (object overhead) |
 | Use for | Internal accounting | User-facing transfers |
 
-**Rule of thumb**: Use `Balance<T>` inside your engine structs, convert to `Coin<T>` only when transferring to users.
+**Rule of thumb**: Use `Balance<T>` inside package-owned structs, convert to `Coin<T>` only when transferring to users.
 
 ---
 
@@ -106,7 +112,7 @@ public struct CoinMetadata<phantom T> has key, store { ... }
 ### Creating a Currency
 
 ```move
-module my_game::gold {
+module my_package::gold {
     use sui::coin;
 
     /// One-Time Witness (must match module name, uppercase)
@@ -117,8 +123,8 @@ module my_game::gold {
             witness,          // OTW consumed here
             9,                // decimals
             b"GOLD",          // symbol
-            b"Game Gold",     // name
-            b"In-game currency", // description
+            b"Project Gold",     // name
+            b"Utility token", // description
             option::none(),   // icon_url
             ctx,
         );
@@ -170,15 +176,15 @@ coin::take(balance: &mut Balance<T>, amount: u64, ctx): Coin<T>  // take from ba
 coin::put(balance: &mut Balance<T>, coin: Coin<T>)               // put coin into balance
 ```
 
-### Engine Pattern: Reward Distribution
+### Common Pattern: User Payout
 
 ```move
-public fun claim_reward(
+public fun claim_payout(
     treasury: &mut TreasuryCap<GOLD>,
     amount: u64,
     ctx: &mut TxContext,
 ) {
-    // Mint and send directly to player
+    // Mint and send directly to the caller
     coin::mint_and_transfer(treasury, amount, ctx.sender(), ctx);
 }
 ```
@@ -209,7 +215,7 @@ fun init(otw: MONSTERS, ctx: &mut TxContext) {
     display.add(b"name".to_string(), b"{name}".to_string());
     display.add(b"description".to_string(), b"Level {level} monster".to_string());
     display.add(b"image_url".to_string(), b"{image_url}".to_string());
-    display.add(b"project_url".to_string(), b"https://mygame.com".to_string());
+    display.add(b"project_url".to_string(), b"https://example.com".to_string());
 
     // Commit the display (makes it active)
     display.update_version();
@@ -241,6 +247,6 @@ Templates use `{field_name}` to interpolate struct fields:
 | `creator` | Creator name |
 | `thumbnail_url` | Smaller preview image |
 
-### Engine Use
+### Common Use
 
-Display is set up once per type during package publish (`init`). It's primarily for entities, items, or any objects that users see in wallets.
+Display is set up once per type during package publish (`init`). It's primarily for user-facing objects that appear in wallets, explorers, or marketplaces.

@@ -2,6 +2,15 @@
 
 > Source: [Move Book Ch 8.4, 8.7, 8.11–8.12, 8.16](https://move-book.com/programmability/)
 
+## Table of Contents
+
+- [Pattern: Capability](#pattern-capability)
+- [Pattern: Witness](#pattern-witness)
+- [Pattern: One-Time Witness (OTW)](#pattern-one-time-witness-otw)
+- [Pattern: Hot Potato](#pattern-hot-potato)
+- [Pattern: Wrapper Type](#pattern-wrapper-type)
+- [Summary: When to Use Each Pattern](#summary-when-to-use-each-pattern)
+
 ## Pattern: Capability
 
 **Problem**: How to restrict certain operations to authorized users?
@@ -32,7 +41,7 @@ fun init(ctx: &mut TxContext) {
 - Pass by reference (`&AdminCap`) for authorization checks
 - Use `key, store` so the cap can be transferred to other accounts
 
-**Engine use case**: Admin operations on registries, game pause/unpause, parameter tuning.
+**Common use case**: Admin operations on registries, package controls, and parameter tuning.
 
 ---
 
@@ -43,7 +52,7 @@ fun init(ctx: &mut TxContext) {
 **Solution**: A module proves ownership of a type by constructing it. Only the defining module can create instances of its types.
 
 ```move
-module game::my_token;
+module my_package::my_token;
 
 /// The witness — only this module can create it
 public struct MY_TOKEN has drop {}
@@ -61,7 +70,7 @@ fun init(witness: MY_TOKEN, ctx: &mut TxContext) {
 - The receiving function takes it by value
 - Only the defining module can create the struct → proof of module identity
 
-**Engine use case**: Creating typed supplies, registering component types, package identity verification.
+**Common use case**: Creating typed supplies, registering types, and package identity verification.
 
 ---
 
@@ -76,7 +85,7 @@ A special witness guaranteed to be created **exactly once**, in the module's `in
 4. Automatically passed as the first argument to `init`
 
 ```move
-module game::my_coin;
+module my_package::my_coin;
 
 /// OTW: matches module name, has only `drop`, no fields
 public struct MY_COIN has drop {}
@@ -86,7 +95,7 @@ fun init(witness: MY_COIN, ctx: &mut TxContext) {
 }
 ```
 
-**Engine use case**: One-time initialization of coin types, unique registry creation.
+**Common use case**: One-time initialization of coin types and unique registry creation.
 
 ---
 
@@ -132,7 +141,7 @@ public fun complete_move(
 - **Multi-step workflows**: Force completion of state machine transitions
 - **Variable-path execution**: Different paths to consume the potato
 
-**Engine use case**: Enforcing that a game action sequence completes (e.g., declare attack → resolve attack → apply damage).
+**Common use case**: Enforcing that a multi-step action completes within one transaction.
 
 ---
 
@@ -151,14 +160,14 @@ public struct Timestamped<T: store> has key, store {
 }
 ```
 
-**Engine use case**: Adding metadata (timestamps, creators) to arbitrary component types.
+**Common use case**: Adding metadata such as timestamps or creators to wrapped values.
 
 ## Summary: When to Use Each Pattern
 
-| Pattern | Solves | Engine Layer |
+| Pattern | Solves | Common Use |
 |---------|--------|-------------|
-| Capability | Authorization | Admin controls, game operator |
+| Capability | Authorization | Admin controls, operators, privileged flows |
 | Witness | Module identity proof | Type registration, coin creation |
 | OTW | One-time initialization | Registry setup, package init |
-| Hot Potato | Forced transaction completion | Multi-step game actions |
-| Wrapper | Extending foreign types | Adding metadata to components |
+| Hot Potato | Forced transaction completion | Multi-step transactional workflows |
+| Wrapper | Extending foreign types | Adding metadata or constraints |

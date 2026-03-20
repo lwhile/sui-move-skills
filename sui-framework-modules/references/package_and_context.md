@@ -2,6 +2,11 @@
 
 > Covers `sui::package`, `sui::tx_context`
 
+## Table of Contents
+
+- [`sui::tx_context` — Transaction Context](#suitx_context--transaction-context)
+- [`sui::package` — Package Identity & Upgrades](#suipackage--package-identity--upgrades)
+
 ## `sui::tx_context` — Transaction Context
 
 Provides information about the currently executing transaction. Passed to entry functions automatically.
@@ -112,7 +117,7 @@ fun init(otw: MY_MODULE, ctx: &mut TxContext) {
 }
 ```
 
-**Engine use**: Publisher is required to create `Display` objects. Claim it in `init` and keep it.
+**Common use**: `Publisher` is required to create `Display` objects. Claim it in `init` and keep it.
 
 ### UpgradeCap — Version Control
 
@@ -152,29 +157,29 @@ let ticket = cap.authorize_upgrade(policy, digest);
 cap.commit_upgrade(receipt);
 ```
 
-### Engine Pattern: Version Guards
+### Version Guards
 
 ```move
 const CURRENT_VERSION: u64 = 1;
 
-public struct GameConfig has key {
+public struct SharedConfig has key {
     id: UID,
     version: u64,
     // ... config fields
 }
 
-public fun assert_version(config: &GameConfig) {
+public fun assert_version(config: &SharedConfig) {
     assert!(config.version == CURRENT_VERSION, EWrongVersion);
 }
 
 // Every entry function checks version
-entry fun play(config: &GameConfig, ...) {
+entry fun execute(config: &SharedConfig, ...) {
     assert_version(config);
-    // ... game logic
+    // ... business logic
 }
 
 // Migration function for upgrades
-entry fun migrate(config: &mut GameConfig, cap: &UpgradeCap) {
+entry fun migrate(config: &mut SharedConfig, cap: &UpgradeCap) {
     assert!(config.version == CURRENT_VERSION - 1, ENotMigratable);
     config.version = CURRENT_VERSION;
     // ... apply data migrations

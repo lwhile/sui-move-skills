@@ -2,6 +2,13 @@
 
 > Source: [Move Book — Better Error Handling](https://move-book.com/guides/better-error-handling)
 
+## Table of Contents
+
+- [Error Constants Convention](#error-constants-convention)
+- [Three Rules of Error Handling](#three-rules-of-error-handling)
+- [Error Code Organization](#error-code-organization)
+- [Guard Functions](#guard-functions)
+
 ## Error Constants Convention
 
 Error constants use **EPascalCase** naming and are `u64` typed.
@@ -139,26 +146,27 @@ This makes it easy to identify which module aborted from the error code alone.
 
 ---
 
-## Engine Pattern: Guard Functions
+## Guard Functions
 
 ```move
-/// Reusable guard that checks entity validity before any system operation
-public fun assert_entity_ready(
-    entity: &Entity,
+const EPositionClosed: u64 = 0;
+const ESettlementNotReady: u64 = 1;
+
+/// Reusable guard that validates a resource before an operation
+public fun assert_position_ready(
+    position: &Position,
     clock: &Clock,
 ) {
-    assert!(entity.is_alive(), EEntityDead);
-    assert!(entity.cooldown_ready(clock), ECooldownActive);
+    assert!(position.is_open(), EPositionClosed);
+    assert!(position.can_settle(clock), ESettlementNotReady);
 }
 
-/// System entry points call this first
-public fun attack(
-    attacker: &mut Entity,
-    defender: &mut Entity,
+/// Entry points call this first
+public fun settle(
+    position: &mut Position,
     clock: &Clock,
 ) {
-    assert_entity_ready(attacker, clock);
-    assert_entity_ready(defender, clock);
-    // ... combat logic
+    assert_position_ready(position, clock);
+    // ... settlement logic
 }
 ```

@@ -2,6 +2,18 @@
 
 > Covers `sui::bag`, `sui::table`, `sui::object_bag`, `sui::object_table`, `sui::vec_map`, `sui::vec_set`, `sui::linked_table`, `sui::priority_queue`
 
+## Table of Contents
+
+- [Quick Reference](#quick-reference)
+- [`sui::vec_set` — Unique Set](#suivec_set--unique-set)
+- [`sui::vec_map` — Small Key-Value Map](#suivec_map--small-key-value-map)
+- [`sui::table` — Large Homogeneous Map](#suitable--large-homogeneous-map)
+- [`sui::bag` — Heterogeneous Collection](#suibag--heterogeneous-collection)
+- [`sui::object_table` / `sui::object_bag`](#suiobject_table--suiobject_bag)
+- [`sui::linked_table` — Ordered Map with Iteration](#suilinked_table--ordered-map-with-iteration)
+- [`sui::priority_queue` — Min-Heap](#suipriority_queue--min-heap)
+- [Recommendations](#recommendations)
+
 ## Quick Reference
 
 | Module | Type | Backed By | Key Constraint | Value Constraint | Iterable | Size Limit |
@@ -164,7 +176,7 @@ let empty = lt.is_empty();
 lt.destroy_empty();
 ```
 
-**Engine uses**: Leaderboards, ordered queues, turn order, LRU caches.
+**Common uses**: Leaderboards, ordered queues, retry order, and LRU caches.
 
 ---
 
@@ -192,20 +204,20 @@ pq.insert(0, b"urgent");               // add new entry
 
 **Abilities**: `PriorityQueue<T>` has `store, drop` (when T has them)
 
-**Engine uses**: Turn scheduling (initiative order), event processing queues.
+**Common uses**: Scheduling queues, retry queues, and priority-driven workflows.
 
 ---
 
-## Engine Recommendations
+## Recommendations
 
-| ECS Concept | Best Collection | Why |
-|-------------|----------------|-----|
-| Component data fields | struct fields or `VecMap` | Small, known at compile time |
-| Component attachment | `dynamic_field` (raw) | Not a collection — direct UID attachment |
-| Inventory (many typed items) | `Bag` | Heterogeneous items |
-| Inventory (same-type items) | `Table` | Homogeneous, unlimited |
-| Equipment with visible IDs | `ObjectBag` or `ObjectTable` | Object identity preserved |
-| Leaderboard | `LinkedTable` | Ordered, iterable |
-| Turn order / initiative | `PriorityQueue` | Sorted pop |
-| Tags / status effects | `VecSet` | Small, unique |
-| Config key-value | `VecMap` or `dynamic_field` | Depends on size |
+| Use Case | Best Collection | Why |
+|----------|----------------|-----|
+| Small fixed data attached to one object | struct fields or `VecMap` | Small, known at compile time |
+| Extensible named attachment | `dynamic_field` (raw) | Direct UID attachment |
+| Heterogeneous inventory or registry | `Bag` | Mixed value types |
+| Large same-type collection | `Table` | Homogeneous, unlimited |
+| Stored objects with visible IDs | `ObjectBag` or `ObjectTable` | Object identity preserved |
+| Ordered ranking or queue | `LinkedTable` | Ordered, iterable |
+| Priority-driven processing | `PriorityQueue` | Sorted pop |
+| Small unique labels or tags | `VecSet` | Small, unique |
+| Config key-value store | `VecMap` or `dynamic_field` | Depends on size and growth |

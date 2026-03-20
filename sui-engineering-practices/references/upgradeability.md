@@ -2,6 +2,14 @@
 
 > Source: [Move Book — Upgradeability Practices](https://move-book.com/guides/upgradeability-practices)
 
+## Table of Contents
+
+- [Compatibility Rules](#compatibility-rules)
+- [Version Guard Pattern](#version-guard-pattern)
+- [Config Anchoring Pattern](#config-anchoring-pattern)
+- [Upgrade Policies](#upgrade-policies)
+- [Package Design Guidance](#package-design-guidance)
+
 ## Compatibility Rules
 
 An upgrade must not break **public compatibility** with the previous version.
@@ -138,28 +146,28 @@ cap.make_immutable();           // destroyed, no more upgrades
 
 ---
 
-## Engine-Specific Guidance
+## Package Design Guidance
 
 ### Rule 1: Keep public structs minimal
 
 ```move
-// Entity struct — keep fields to absolute minimum
-public struct Entity has key {
+// Public struct — keep fields to the stable minimum
+public struct Registry has key {
     id: UID,
-    `type`: String,         // never changes meaning
+    kind: String,           // never changes meaning
     created_at: u64,        // never changes meaning
 }
-// All game data goes in dynamic fields (components)
+// Evolving configuration can live in dynamic fields
 ```
 
 ### Rule 2: Prefer `public(package)` over `public` for internal APIs
 
 ```move
-// Only the engine package calls this — use package visibility
-public(package) fun uid_mut(entity: &mut Entity): &mut UID { ... }
+// Only this package calls it — use package visibility
+public(package) fun uid_mut(registry: &mut Registry): &mut UID { ... }
 
 // External packages call this — must be public
-public fun borrow_component<T>(entity: &Entity, key: String): &T { ... }
+public fun borrow_value<T>(registry: &Registry, key: String): &T { ... }
 ```
 
 ### Rule 3: Version your registries

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Sui Move Patterns"
+  short_description: "Model Sui objects, storage, and design patterns"
+  default_prompt: "Use $sui-move-patterns to help model a Sui Move package or object design."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,11 +1,18 @@
 ---
-name: Sui Framework Modules
-description: Quick reference for Sui Framework modules used in on-chain game engine development. Covers object identity, dynamic fields, transfer, events, clock, randomness, coins/balances, and package management.
+name: sui-framework-modules
+description: Use when you need exact Sui Framework module signatures, type constraints, and API selection guidance while writing Move code.
 ---
 
 # Sui Framework Modules
 
-API reference for Sui Framework modules relevant to game engine development. Use this when writing actual Move code and you need the exact function signatures, type constraints, or usage patterns.
+API reference for core Sui Framework modules. Use this when writing concrete Move code and you need exact function signatures, type constraints, or module selection guidance.
+
+This skill is for framework APIs, not higher-level modeling. For ownership and design choices, switch to `$sui-move-patterns`. For production checks such as upgrades, limits, and testing, switch to `$sui-engineering-practices`.
+
+Use this for prompts like:
+- "What does `dynamic_object_field` require?"
+- "Which transfer function should I call here?"
+- "What is the exact API for `coin`, `balance`, `clock`, or `package`?"
 
 > **Source**: All content is distilled from the [Sui Framework reference](https://docs.sui.io/references/framework/sui).
 
@@ -43,7 +50,7 @@ Use this to pick the right module for your task:
 | Make shared (irreversible) | `sui::transfer` | `transfer::share_object(obj)` |
 | Make immutable (irreversible) | `sui::transfer` | `transfer::freeze_object(obj)` |
 
-### "I need game infrastructure"
+### "I need shared runtime services"
 
 | Need | Module | Function |
 |------|--------|----------|
@@ -76,8 +83,8 @@ Use this to pick the right module for your task:
 
 | File | What It Covers |
 |------|---------------|
-| [storage_modules.md](./references/storage_modules.md) | `object`, `dynamic_field`, `dynamic_object_field`, `transfer` — identity, storage, ownership |
-| [collections_modules.md](./references/collections_modules.md) | `bag`, `table`, `vec_map`, `vec_set`, `linked_table`, `priority_queue` — framework collections |
-| [game_modules.md](./references/game_modules.md) | `clock`, `random`, `event`, `math` — game infrastructure |
-| [token_modules.md](./references/token_modules.md) | `coin`, `balance`, `display` — fungible tokens, metadata |
-| [package_and_context.md](./references/package_and_context.md) | `package`, `tx_context` — deployment, identity, upgrades |
+| [storage_modules.md](./references/storage_modules.md) | Open for `object`, dynamic fields, and transfer semantics |
+| [collections_modules.md](./references/collections_modules.md) | Open for framework collection APIs such as `table`, `bag`, and `linked_table` |
+| [game_modules.md](./references/game_modules.md) | Open for `clock`, `random`, `event`, and `math` runtime services |
+| [token_modules.md](./references/token_modules.md) | Open for `coin`, `balance`, and `display` APIs |
+| [package_and_context.md](./references/package_and_context.md) | Open for `package` and `tx_context` behavior during publish and execution |

@@ -2,6 +2,16 @@
 
 > Source: [Move Book Ch 8.8–8.10](https://move-book.com/programmability/dynamic-fields)
 
+## Table of Contents
+
+- [Two Types of Dynamic Fields](#two-types-of-dynamic-fields)
+- [When to Use Which](#when-to-use-which)
+- [Field Name Types](#field-name-types)
+- [UID Exposure — Security Model](#uid-exposure--security-model)
+- [Limits](#limits)
+- [Orphaned Fields](#orphaned-fields)
+- [Dynamic Collections (Table, Bag)](#dynamic-collections-table-bag)
+
 ## Two Types of Dynamic Fields
 
 ### `sui::dynamic_field` (df)
@@ -49,7 +59,7 @@ let sword_id: Option<ID> = dof::id(&obj.id, b"weapon");
 
 | Scenario | Use | Reason |
 |----------|-----|--------|
-| ECS components (pure data) | `dynamic_field` | Components are data, not objects. Cheaper. |
+| Pure data attachments | `dynamic_field` | Data is stored directly and more cheaply. |
 | Nested objects that need ID lookup | `dynamic_object_field` | Preserves object identity for off-chain indexing |
 | Simple key-value data | `dynamic_field` | Lower cost, simpler |
 
@@ -70,7 +80,7 @@ df::add(&mut id, ascii::string(b"health"), data);
 df::add(&mut id, 42u64, data);
 ```
 
-**Convention for ECS**: Use `ascii::String` keys from a `borrow_key()` function in each component module.
+**Convention**: Use stable typed keys or `ascii::String` keys from helper functions so callers do not hand-roll string literals inconsistently.
 
 ## UID Exposure — Security Model
 
@@ -84,7 +94,7 @@ public fun uid(obj: &MyObject): &UID { &obj.id }
 public fun uid_mut(obj: &mut MyObject): &mut UID { &mut obj.id }
 ```
 
-**Best practice for ECS**: The entity package exposes generic `add_component` / `borrow_component` / `borrow_mut_component` functions that pass the UID internally. External packages never get raw `&mut UID`.
+**Best practice**: Expose narrow helper functions that use the UID internally. Avoid giving external callers raw `&mut UID` access unless they truly own the attachment surface.
 
 ## Limits
 

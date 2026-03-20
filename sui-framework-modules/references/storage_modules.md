@@ -2,6 +2,13 @@
 
 > Covers `sui::object`, `sui::dynamic_field`, `sui::dynamic_object_field`, `sui::transfer`
 
+## Table of Contents
+
+- [`sui::object` — Object Identity](#suiobject--object-identity)
+- [`sui::dynamic_field` — Dynamic Data Attachment](#suidynamic_field--dynamic-data-attachment)
+- [`sui::dynamic_object_field` — Object-Preserving Attachment](#suidynamic_object_field--object-preserving-attachment)
+- [`sui::transfer` — Ownership Management](#suitransfer--ownership-management)
+
 ## `sui::object` — Object Identity
 
 Every Sui object needs a globally unique `UID`. This module creates and manages them.
@@ -49,7 +56,7 @@ public fun id_from_address(a: address): ID
 public fun id_from_bytes(bytes: vector<u8>): ID
 ```
 
-### Engine Usage
+### Common Usage
 
 ```move
 public struct Entity has key {
@@ -67,9 +74,9 @@ public fun destroy(entity: Entity) {
 
 ---
 
-## `sui::dynamic_field` — Component Attachment
+## `sui::dynamic_field` — Dynamic Data Attachment
 
-Dynamic fields attach data to any `UID` at runtime. This is the **core mechanism** for ECS component attachment.
+Dynamic fields attach data to any `UID` at runtime. This is the core mechanism for extensible per-object storage.
 
 ### API Summary
 
@@ -90,12 +97,12 @@ Dynamic fields attach data to any `UID` at runtime. This is the **core mechanism
 - A field keyed by `(Name_type, name_value)` is unique per object
 - Dynamic fields are **lazy-loaded** — only accessed fields cost gas
 
-### Engine Pattern: Component Keys
+### Common Pattern: Named Attachments
 
 ```move
 use std::ascii::String;
 
-// Components use ascii::String keys
+// Use ascii::String keys for named attachments
 const HEALTH_KEY: vector<u8> = b"health";
 
 public fun add_health(entity: &mut Entity, health: Health) {
@@ -144,7 +151,7 @@ dof::exists_with_type<Name, Value>(&UID, name): bool
 dof::id<Name: copy+drop+store>(&UID, name): Option<ID>
 ```
 
-### Engine Pattern: Equipment Slots
+### Common Pattern: Data vs Nested Objects
 
 ```move
 // Equipment is an object (key + store) — use dof
@@ -203,17 +210,17 @@ public fun receive<T: key>(parent: &mut UID, to_receive: Receiving<T>): T
 public fun public_receive<T: key+store>(parent: &mut UID, to_receive: Receiving<T>): T
 ```
 
-### Engine Pattern: Entity Lifecycle
+### Common Pattern: Ownership Lifecycle
 
 ```move
-// Create and transfer to player
-public fun spawn(ctx: &mut TxContext) {
-    let entity = entity::new(b"character", clock, ctx);
-    transfer::transfer(entity, ctx.sender());
+// Create and transfer to the caller
+public fun mint(ctx: &mut TxContext) {
+    let asset = Asset { id: object::new(ctx), ... };
+    transfer::transfer(asset, ctx.sender());
 }
 
-// Share game state
-public fun create_world(ctx: &mut TxContext) {
+// Share a registry
+public fun create_registry(ctx: &mut TxContext) {
     let registry = Registry { id: object::new(ctx), ... };
     transfer::share_object(registry); // anyone can access
 }

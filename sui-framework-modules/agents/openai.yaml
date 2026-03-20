@@ -1,0 +1,7 @@
+interface:
+  display_name: "Sui Framework Modules"
+  short_description: "Look up exact Sui Framework APIs and constraints"
+  default_prompt: "Use $sui-framework-modules to look up the exact Sui Framework API for this Move code."
+
+policy:
+  allow_implicit_invocation: false

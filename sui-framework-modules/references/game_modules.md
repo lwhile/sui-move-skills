@@ -1,10 +1,17 @@
-# Game Modules
+# Runtime Modules
 
 > Covers `sui::clock`, `sui::random`, `sui::event`, `sui::math`
 
+## Table of Contents
+
+- [`sui::clock` — Timestamps](#suiclock--timestamps)
+- [`sui::random` — On-Chain Randomness](#suirandom--on-chain-randomness)
+- [`sui::event` — Off-Chain Events](#suievent--off-chain-events)
+- [`sui::math` — Integer Utilities](#suimath--integer-utilities)
+
 ## `sui::clock` — Timestamps
 
-Provides the current network timestamp. Used for cooldowns, timers, and timed events.
+Provides the current network timestamp. Useful for unlock times, TTLs, expirations, and timed workflows.
 
 ### The Clock Object
 
@@ -32,15 +39,14 @@ public fun timestamp_ms(clock: &Clock): u64
 
 ```move
 // Entry function receives Clock as immutable reference
-entry fun attack(
-    entity: &mut Entity,
+entry fun claim_if_ready(
+    vault: &mut Vault,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
     let now = clock.timestamp_ms();
-    let cooldown = borrow_cooldown(entity);
-    assert!(now >= cooldown.ready_at, ECooldownActive);
-    // ... perform action
+    assert!(now >= vault.unlock_at, EVaultLocked);
+    // ... proceed with the claim
 }
 ```
 
@@ -136,28 +142,28 @@ gen.generate_bytes(num_bytes: u16): vector<u8>
 
 1. **Randomness must be consumed in an `entry` function** — don't expose `RandomGenerator` through `public` functions
 2. **Don't make randomness-dependent transfers conditional** — always transfer the result, even if it's a "loss"
-entry`)** where possible to prevent composability attacks
+3. **Keep the random decision and its side effects in the same `entry` function** where possible to reduce composability risk
 4. **Test with `random::create_for_testing(ctx)`**
 
-### Engine Pattern: Combat Rolls
+### Common Pattern: Randomized Outcome
 
 ```move
-entry fun attack(
-    attacker: &mut Entity,
-    defender: &mut Entity,
+entry fun draw_reward(
+    account: &mut Account,
     r: &Random,
-    clock: &Clock,
     ctx: &mut TxContext,
 ) {
     let mut gen = random::new_generator(r, ctx);
-    let roll = gen.generate_u64_in_range(1, 20); // d20
-    let damage = if (roll >= 10) {
-        gen.generate_u64_in_range(5, 15) // hit damage
+    let reward_tier = gen.generate_u64_in_range(1, 100);
+    let payout = if (reward_tier > 95) {
+        1_000
+    } else if (reward_tier > 70) {
+        100
     } else {
-        0 // miss
+        10
     };
-    // apply damage...
-    event::emit(AttackEvent { roll, damage, ... });
+    // apply payout...
+    event::emit(RewardDrawn { reward_tier, payout });
 }
 ```
 
@@ -191,24 +197,29 @@ public native fun emit<T: copy + drop>(event: T)
 
 **One function.** The event struct must have `copy + drop`.
 
-### Engine Pattern
+### Common Pattern
 
 ```move
 // Define event struct (copy + drop required)
-public struct DamageDealt has copy, drop {
-    attacker_id: ID,
-    defender_id: ID,
-    amount: u64,
+public struct ValueAdjusted has copy, drop {
+    object_id: ID,
+    actor: address,
+    delta: u64,
     timestamp: u64,
 }
 
-// Emit in system logic
-public fun apply_damage(...) {
-    // ... modify components ...
-    event::emit(DamageDealt {
-        attacker_id: object::id(attacker),
-        defender_id: object::id(defender),
-        amount: damage,
+// Emit in business logic
+public fun apply_update(
+    target: &Target,
+    actor: address,
+    amount: u64,
+    clock: &Clock,
+) {
+    // ... modify state ...
+    event::emit(ValueAdjusted {
+        object_id: object::id(target),
+        actor,
+        delta: amount,
         timestamp: clock.timestamp_ms(),
     });
 }
@@ -219,7 +230,7 @@ public fun apply_damage(...) {
 - Events are **write-only** — Move code cannot read past events
 - Events are indexed by their **type** (module + struct name)
 - Include enough data for the client to reconstruct what happened
-- Include `ID` fields so clients can correlate events to entities
+- Include `ID` fields so clients can correlate events to on-chain objects
 - Include timestamps when timing matters
 - **Phantom type parameters** can be used for filtering: `emit(MyEvent<phantom GameType> { ... })`
 
@@ -240,7 +251,7 @@ math::sqrt(x: u64): u64             // integer square root
 math::divide_and_round_up(x: u64, y: u64): u64  // ceil division
 ```
 
-### Engine Usage
+### Common Usage
 
 ```move
 // Clamp health to max
